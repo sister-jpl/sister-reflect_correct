@@ -100,7 +100,7 @@ def main():
     header_dict = rfl.get_header()
     output_name = "%s/%s" % (args.out_dir,rfl.base_name.replace('rfl','crfl'))
 
-    print('Exporting corrected images')
+    print('Exporting corrected image')
     writer = WriteENVI(output_name,header_dict)
     iterator = rfl.iterate(by='line', corrections=rfl.corrections)
     while not iterator.complete:
