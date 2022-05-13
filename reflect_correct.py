@@ -80,23 +80,27 @@ def main():
     rfl.create_bad_bands([[300,400],[1337,1430],[1800,1960],[2450,2600]])
 
     if args.topo:
+        print('Calculating topo coefficients')
         rfl.mask['calc_topo'] =  mask_create(rfl,config_dict['topo']['calc_mask'])
         rfl.mask['apply_topo'] =  mask_create(rfl,config_dict['topo']['apply_mask'])
         calc_scsc_coeffs(rfl,config_dict['topo'])
         rfl.corrections.append('topo')
     if args.brdf:
+        print('Calculating BRDF coefficients')
         set_brdf(rfl,config_dict['brdf'])
         set_solar_zn(rfl)
         rfl.mask['calc_brdf'] =  mask_create(rfl,config_dict['brdf']['calc_mask'])
         calc_flex_single(rfl,config_dict['brdf'])
         rfl.corrections.append('brdf')
     if args.glint:
+        print('Setting glint coefficients')
         rfl.glint = config_dict['glint']
         rfl.corrections.append('glint')
 
     header_dict = rfl.get_header()
     output_name = "%s/%s" % (args.out_dir,rfl.base_name.replace('rfl','crfl'))
 
+    print('Exporting corrected images')
     writer = WriteENVI(output_name,header_dict)
     iterator = rfl.iterate(by='line', corrections=rfl.corrections)
     while not iterator.complete:
