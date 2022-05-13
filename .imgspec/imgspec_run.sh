@@ -34,4 +34,4 @@ python ${pge_dir}/reflect_correct.py $rfl_file $obs_file output/${out_dir} $corr
 
 cd output
 tar -czvf ${out_dir}.tar.gz $out_dir
-rm -r out_dir
+rm -r $out_dir
