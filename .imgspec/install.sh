@@ -6,5 +6,5 @@ pge_dir=$(dirname ${imgspec_dir})
 conda create -y --name sister python=3.8
 source activate sister
 pip install hy_tools
-yes | pip uninstall ray
-yes | pip install 'ray[default]'
+#yes | pip uninstall ray
+#yes | pip install 'ray[default]'
