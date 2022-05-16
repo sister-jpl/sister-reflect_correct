@@ -9,21 +9,24 @@ mkdir output
 
 for a in `ls -1 input/*.tar.gz`; do tar -xzvf $a -C input; done
 
-obs_file=$(ls input/*/*obs_ort)
 rfl_file=$(ls input/*/*rfl)
 file_base=$(basename $rfl_file)
 
 if [[ $file_base == f* ]]; then
     output_prefix=$(echo $file_base | cut -c1-16)
+    obs_file=$(ls input/*/*obs_ort)
     corrections="--topo --brdf --glint"
 elif [[ $file_base == ang* ]]; then
     output_prefix=$(echo $file_base | cut -c1-18)
+    obs_file=$(ls input/*/*obs_ort)
     corrections="--topo --brdf --glint"
 elif [[ $file_base == PRS* ]]; then
     output_prefix=$(echo $file_base | cut -c1-38)
+    obs_file=$(ls input/*/*obs_prj)
     corrections="--glint"
 elif [[ $file_base == DESIS* ]]; then
     output_prefix=$(echo $file_base | cut -c1-44)
+    obs_file=$(ls input/*/*obs_prj)
     corrections="--glint"
 fi
 
