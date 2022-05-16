@@ -40,7 +40,7 @@ config_dict["brdf"]['interp_kind'] = 'linear'
 config_dict["brdf"]['calc_mask'] = [["ndi", {'band_1': 850,'band_2': 660,
                                               'min': 0.1,'max': 1.0}]]
 config_dict["brdf"]['apply_mask'] = [["ndi", {'band_1': 850,'band_2': 660,
-                                              'min': 0.05,'max': 1.0}]]
+                                              'min': 0.1,'max': 1.0}]]
 config_dict["brdf"]['bin_type'] = 'dynamic'
 config_dict["brdf"]['num_bins'] = 18
 config_dict["brdf"]['ndvi_bin_min'] = 0.1
@@ -52,7 +52,7 @@ config_dict["glint"]  = {}
 config_dict['glint']['type'] = 'gao'
 config_dict['glint']['correction_wave'] = 860
 config_dict['glint']['apply_mask'] =  [["ndi", {'band_1': 850,'band_2': 660,
-                                              'min': -1,'max': 0.1}]]
+                                              'min': -1,'max': 0.}]]
 
 def main():
 
