@@ -11,6 +11,9 @@ anc_names = ['path_length','sensor_az','sensor_zn',
                 'solar_az', 'solar_zn','phase','slope',
                 'aspect', 'cosine_i','utc_time','']
 
+
+# Hard-code configuration dictionary
+#######################################################
 config_dict = {}
 config_dict["topo"] =  {}
 config_dict["topo"]['type'] =  'scs+c'
@@ -53,11 +56,12 @@ config_dict['glint']['type'] = 'gao'
 config_dict['glint']['correction_wave'] = 860
 config_dict['glint']['apply_mask'] =  [["ndi", {'band_1': 850,'band_2': 660,
                                               'min': -1,'max': 0.}]]
+#######################################################
+
 
 def main():
 
-    desc = "Correct reflectance"
-
+    desc = "Apply topographic, BRDF and glint corrections to reflectance image"
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('rfl_file', type=str,
                         help='Input reflectance image')
@@ -74,11 +78,13 @@ def main():
 
     args = parser.parse_args()
 
+    # Load input file
     anc_files = dict(zip(anc_names,[[args.obs_file,a] for a in range(len(anc_names))]))
     rfl = ht.HyTools()
     rfl.read_file(args.rfl_file,'envi',anc_files)
     rfl.create_bad_bands([[300,400],[1337,1430],[1800,1960],[2450,2600]])
 
+    #Run corrections
     if args.topo:
         print('Calculating topo coefficients')
         rfl.mask['calc_topo'] =  mask_create(rfl,config_dict['topo']['calc_mask'])
@@ -97,7 +103,9 @@ def main():
         rfl.glint = config_dict['glint']
         rfl.corrections.append('glint')
 
+    #Export corrected reflectance
     header_dict = rfl.get_header()
+    header_dict['description'] = "Corrected reflectance"
     output_name = "%s/%s" % (args.out_dir,rfl.base_name.replace('rfl','crfl'))
 
     print('Exporting corrected image')
@@ -107,7 +115,6 @@ def main():
         line = iterator.read_next()
         writer.write_line(line,iterator.current_line)
     writer.close()
-
 
 if __name__== "__main__":
     main()
