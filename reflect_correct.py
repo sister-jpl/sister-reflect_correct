@@ -56,6 +56,7 @@ config_dict['glint']['type'] = 'gao'
 config_dict['glint']['correction_wave'] = 860
 config_dict['glint']['apply_mask'] =  [["ndi", {'band_1': 850,'band_2': 660,
                                               'min': -1,'max': 0.}]]
+config_dict['glint']['truncate'] = True
 #######################################################
 
 
