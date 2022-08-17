@@ -1,1 +1,1 @@
-# sister-reflect_correct
+# sister-reflect_correctApply correction algorithms (topographic, BRDF and glint) to reflectance images.## Use```bashpython reflect_correct.py rfl_file obs_file out_dir```Optional arguments:- `--topo`: Apply topographic correction.- `--brdf`: Apply BRDF correction.- `--glint`: Apply glint correction.

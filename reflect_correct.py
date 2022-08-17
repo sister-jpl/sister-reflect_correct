@@ -79,6 +79,10 @@ def main():
 
     args = parser.parse_args()
 
+    if not args.topo | args.brdf | args.glint:
+        print("No corrections specified. Exiting.")
+        return
+
     # Load input file
     anc_files = dict(zip(anc_names,[[args.obs_file,a] for a in range(len(anc_names))]))
     rfl = ht.HyTools()
