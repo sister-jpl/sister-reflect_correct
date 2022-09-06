@@ -2,7 +2,7 @@
 
 ## Description
 
-The L2a reflectance correction PGE takes as input 
+The L2a reflectance correction PGE applies a series of algorithms including topographic, BRDF and glint correction to surface reflectance data.......
 
 
 ## PGE Arguments
