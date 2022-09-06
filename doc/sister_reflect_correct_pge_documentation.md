@@ -24,11 +24,11 @@ The L2A spectral resampling PGE exports 2 ENVI formatted datacubes along with th
 
 |Subproduct| Description |  Units |Example filename |
 |---|---|---|---| 
-| CORFL| ENVI 10nm reflectance datacube | % | AVNG\_20220502T180901\_L1B\_CORFL\_001 |
-| CORFL  .hdr| ENVI 10nm reflectance header file  | - | AVNG\_20220502T180901\_L1B\_CORFL\_001.hdr |
+| CORFL| ENVI corrected reflectance datacube | % | AVNG\_20220502T180901\_L2A\_CORFL\_001 |
+| CORFL  .hdr| ENVI corrected reflectance header file  | - | AVNG\_20220502T180901\_L2A\_CORFL\_001.hdr |
 
 
-All outputs of the L2a reflectance correction are compressed into a single tar.gz file using the following naming structure:
+All outputs of the L2A reflectance correction are compressed into a single tar.gz file using the following naming structure:
  
  	 	INSTRUMENT_YYYYMMDDTHHMMSS_L2A_CORFL_VERSION.tar.gz
  	 	
