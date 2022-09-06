@@ -2,12 +2,12 @@
 
 ## Description
 
-The L2a reflectance correction PGE applies a series of algorithms including topographic, BRDF and glint correction to surface reflectance data.......
+The L2A reflectance correction PGE applies a series of algorithms including topographic, BRDF and glint correction to surface reflectance data.......
 
 
 ## PGE Arguments
 
-In addition to required MAAP job submission arguments the L2a spectral resampling PGE also takes the following argument(s):
+In addition to required MAAP job submission arguments the L2A spectral resampling PGE also takes the following argument(s):
 
 
 |Argument| Type |  Description | Default|
@@ -18,15 +18,15 @@ In addition to required MAAP job submission arguments the L2a spectral resamplin
 
 ## Outputs
 
-The L2a spectral resampling PGE exports 2 ENVI formatted datacubes along with their associated header files. 
+The L2A spectral resampling PGE exports 2 ENVI formatted datacubes along with their associated header files. The outputs of the PGE use the following naming convention: 
 
-|Output file| Description |  Units |
-|---|---|---|
-| CORFL| ENVI 10nm reflectance datacube | % |
-| CORFL  .hdr| ENVI 10nm reflectance header file  | - |
+		INSTRUMENT_YYYYMMDDTHHMMSS_L2A_SUBPRODUCT_VERSION
 
-### Filenaming
----
+|Subproduct| Description |  Units |Example filename |
+|---|---|---|---| 
+| CORFL| ENVI 10nm reflectance datacube | % | AVNG\_20220502T180901\_L1B\_CORFL\_001 |
+| CORFL  .hdr| ENVI 10nm reflectance header file  | - | AVNG\_20220502T180901\_L1B\_CORFL\_001.hdr |
+
 
 All outputs of the L2a reflectance correction are compressed into a single tar.gz file using the following naming structure:
  
@@ -34,16 +34,11 @@ All outputs of the L2a reflectance correction are compressed into a single tar.g
  	 	
 example:
 
-		AVNG_20220502T180901_L2A_CORFL_100.tar.gz	
-
-The outputs of the PGE use the following naming convention: 
-
-		INSTRUMENT_YYYYMMDDTHHMMSS_L2A_SUBPRODUCT_VERSION
-	
+		AVNG_20220502T180901_L2A_CORFL_001.tar.gz		
 
 | Subproduct code | Description | Example | 
 | ---|---|---|
-| CORFL | Corrected reflectance datacube | AVNG\_20220502T180901\_L1B\_CORFL\_100 |
+| CORFL | Corrected reflectance datacube | 
 
 
 Header files follow the same naming convention with a .hdr appended to the end of the filename.
