@@ -33,7 +33,7 @@ config_dict["topo"]['c_fit_type'] = 'nnls'
 
 config_dict["brdf"] = {}
 config_dict["brdf"]['type'] =  'flex'
-config_dict["brdf"]['grouped'] =  True
+config_dict["brdf"]['grouped'] =  False
 config_dict["brdf"]['geometric'] = 'li_dense_r'
 config_dict["brdf"]['volume'] = 'ross_thick'
 config_dict["brdf"]["b/r"] = 2.5
@@ -59,6 +59,13 @@ config_dict['glint']['apply_mask'] =  [["ndi", {'band_1': 850,'band_2': 660,
 config_dict['glint']['truncate'] = True
 #######################################################
 
+# def args():return
+# args.out_dir = '/Users/achlus/temp/'
+# args.rfl_file = '/Users/achlus/Downloads/f090710t01p00r11_rfl/f090710t01p00r11_rfl'
+# args.obs_file = '/Users/achlus/Downloads/f090710t01p00r11_l1p/f090710t01p00r11rdn_b_obs_ort'
+# args.topo = False
+# args.brdf  =True
+# args.glint = False
 
 def main():
 
@@ -89,6 +96,7 @@ def main():
     rfl.read_file(args.rfl_file,'envi',anc_files)
     rfl.create_bad_bands([[300,400],[1337,1430],[1800,1960],[2450,2600]])
 
+    corrections = []
     #Run corrections
     if args.topo:
         print('Calculating topo coefficients')
@@ -96,6 +104,7 @@ def main():
         rfl.mask['apply_topo'] =  mask_create(rfl,config_dict['topo']['apply_mask'])
         calc_scsc_coeffs(rfl,config_dict['topo'])
         rfl.corrections.append('topo')
+        corrections.append('Topographic')
     if args.brdf:
         print('Calculating BRDF coefficients')
         set_brdf(rfl,config_dict['brdf'])
@@ -103,15 +112,17 @@ def main():
         rfl.mask['calc_brdf'] =  mask_create(rfl,config_dict['brdf']['calc_mask'])
         calc_flex_single(rfl,config_dict['brdf'])
         rfl.corrections.append('brdf')
+        corretions.append('BRDF')
     if args.glint:
         print('Setting glint coefficients')
         rfl.glint = config_dict['glint']
         rfl.corrections.append('glint')
+        corrections.append('Glint')
 
     #Export corrected reflectance
     header_dict = rfl.get_header()
-    header_dict['description'] = "Corrected reflectance"
-    output_name = "%s/%s" % (args.out_dir,rfl.base_name.replace('rfl','crfl'))
+    header_dict['description'] = "%s corrected reflectance." % (' '.join(corrections))
+    output_name = "%s/%s" % (args.out_dir,rfl.base_name)
 
     print('Exporting corrected image')
     writer = WriteENVI(output_name,header_dict)
