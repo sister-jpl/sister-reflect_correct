@@ -7,7 +7,7 @@ source activate sister
 
 mkdir output
 
-#for a in `ls -1 input/*.tar.gz`; do tar -xzvf $a -C input; done
+for a in `ls -1 input/*.tar.gz`; do tar -xzvf $a -C input; done
 
 rfl_path=$(ls input/*/*RFL* | grep -v '.hdr')
 obs_path=$(ls input/*/*OBS* | grep -v '.hdr')
