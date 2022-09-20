@@ -9,32 +9,35 @@ mkdir output
 
 for a in `ls -1 input/*.tar.gz`; do tar -xzvf $a -C input; done
 
-rfl_file=$(ls input/*/*rfl)
-file_base=$(basename $rfl_file)
+rfl_path=$(ls input/*/*RFL* | grep -v '.hdr')
+obs_path=$(ls input/*/*OBS* | grep -v '.hdr')
 
-if [[ $file_base == f* ]]; then
-    output_prefix=$(echo $file_base | cut -c1-16)
-    obs_file=$(ls input/*/*obs_ort)
+rfl_name=$(basename $rfl_path)
+output_base_name=$(echo "${rfl_name/L2A_RSRFL/"L2A_CORFL"}")
+
+
+echo "Found input RFL file: $rfl_path"
+echo "Found input OB file: $obs_path"
+
+if [[ $file_base == SISTER_AV* ]]; then
     corrections="--topo --brdf --glint"
-elif [[ $file_base == ang* ]]; then
-    output_prefix=$(echo $file_base | cut -c1-18)
-    obs_file=$(ls input/*/*obs_ort)
-    corrections="--topo --brdf --glint"
-elif [[ $file_base == PRS* ]]; then
-    output_prefix=$(echo $file_base | cut -c1-38)
-    obs_file=$(ls input/*/*obs_prj)
-    corrections="--glint"
-elif [[ $file_base == DESIS* ]]; then
-    output_prefix=$(echo $file_base | cut -c1-44)
-    obs_file=$(ls input/*/*obs_prj)
+else [[ $file_base == PRS* ]];
     corrections="--glint"
 fi
 
-out_dir=${output_prefix}_crfl
-mkdir output/${out_dir}
+echo "Applying the following corrections: $corrections"
 
-python ${pge_dir}/reflect_correct.py $rfl_file $obs_file output/${out_dir} $corrections
+mkdir output/${output_base_name}
 
+python ${pge_dir}/reflect_correct.py $rfl_path $obs_path output/${output_base_name} $corrections
+
+#Rename, compress and cleanup outputs
 cd output
-tar -czvf ${out_dir}.tar.gz $out_dir
-rm -r $out_dir
+
+mv */*_RSRFL*.hdr $output_base_name/$output_base_name.hdr
+mv */*_RSRFL* $output_base_name/$output_base_name
+
+python ${imgspec_dir}/generate_metadata.py */*CORFL*.hdr .
+
+tar -czvf ${output_base_name}.tar.gz $output_base_name
+rm -r $output_base_name
