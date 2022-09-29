@@ -9,7 +9,7 @@ Author: Adam Chlus
 import sys
 import json
 import os
-from hytools.io import parse_envi_header
+from hytools_lite.io import parse_envi_header
 
 
 def main():
@@ -24,11 +24,11 @@ def main():
     metadata['sensor'] = header['sensor type'].upper()
     metadata['start_time'] = header['start acquisition time'].upper()
     metadata['end_time'] = header['end acquisition time'].upper()
-    metadata['spatial_bounds'] = {}
-    metadata['spatial_bounds']['latitude_min'] = float(header['latitude min'])
-    metadata['spatial_bounds']['latitude_max'] = float(header['latitude max'])
-    metadata['spatial_bounds']['longitude_min'] = float(header['longitude min'])
-    metadata['spatial_bounds']['longitude_max'] = float(header['longitude max'])
+
+    # Split corner coordinates string into list
+    coords = [float(x) for x in header['bounding box'].replace(']','').replace('[','').split(',')]
+
+    metadata['bounding_box'] = [list(x) for x in zip(coords[::2],coords[1::2])]
     metadata['product'] = base_name.split('_')[4]
     metadata['processing_level'] = base_name.split('_')[3]
 
