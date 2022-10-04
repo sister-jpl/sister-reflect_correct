@@ -38,10 +38,12 @@ mv */*_RSRFL*.hdr $output_base_name/$output_base_name.hdr
 mv */*_RSRFL* $output_base_name/$output_base_name
 
 #Create metadata
-python ${imgspec_dir}/generate_metadata.py */*coRFL*.hdr .
+python ${imgspec_dir}/generate_metadata.py */*CORFL*.hdr .
 
 # Create quicklook
-python ${imgspec_dir}/generate_quicklook.py $(ls */*coRFL* | grep -v '.hdr') .
+python ${imgspec_dir}/generate_quicklook.py $(ls */*CORFL* | grep -v '.hdr') .
 
 tar -czvf ${output_base_name}.tar.gz $output_base_name
 rm -r $output_base_name
+
+cp ../run.log ${out_dir}.log

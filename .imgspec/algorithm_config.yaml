@@ -20,5 +20,5 @@ inputs:
 # rename and set algorithm input names accordingly
   - name: l1b_granule
     type: file
-  - name: l2b_granule
+  - name: l2a_granule
     type: file
