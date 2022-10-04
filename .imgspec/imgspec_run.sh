@@ -46,4 +46,4 @@ python ${imgspec_dir}/generate_quicklook.py $(ls */*CORFL* | grep -v '.hdr') .
 tar -czvf ${output_base_name}.tar.gz $output_base_name
 rm -r $output_base_name
 
-cp ../run.log ${out_dir}.log
+cp ../run.log ${output_base_name}.log
