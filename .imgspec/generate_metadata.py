@@ -9,7 +9,7 @@ Author: Adam Chlus
 import sys
 import json
 import os
-from hytools_lite.io import parse_envi_header
+from hytools.io import parse_envi_header
 
 
 def main():

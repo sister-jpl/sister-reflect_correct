@@ -10,7 +10,7 @@ Author: Adam Chlus
 import sys
 import numpy as np
 from PIL import Image
-import hytools_lite as ht
+import hytools as ht
 
 def main():
 
