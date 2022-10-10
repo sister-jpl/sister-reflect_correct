@@ -17,7 +17,7 @@ output_base_name=$(echo "${rfl_name/L2A_RSRFL/"L2A_CORFL"}")
 
 
 echo "Found input RFL file: $rfl_path"
-echo "Found input OB file: $obs_path"
+echo "Found input OBS file: $obs_path"
 
 if [[ $file_base == SISTER_AV* ]]; then
     corrections="--topo --brdf --glint"
@@ -37,7 +37,13 @@ cd output
 mv */*_RSRFL*.hdr $output_base_name/$output_base_name.hdr
 mv */*_RSRFL* $output_base_name/$output_base_name
 
+#Create metadata
 python ${imgspec_dir}/generate_metadata.py */*CORFL*.hdr .
+
+# Create quicklook
+python ${imgspec_dir}/generate_quicklook.py $(ls */*CORFL* | grep -v '.hdr') .
 
 tar -czvf ${output_base_name}.tar.gz $output_base_name
 rm -r $output_base_name
+
+cp ../run.log ${output_base_name}.log

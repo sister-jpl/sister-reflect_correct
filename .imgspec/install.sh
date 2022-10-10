@@ -5,4 +5,4 @@ pge_dir=$(dirname ${imgspec_dir})
 # Need to do custom install to prevent dependency errors
 conda create -y --name sister python=3.7
 source activate sister
-pip install hy_tools
+pip install -r ${pge_dir}/requirements.txt
