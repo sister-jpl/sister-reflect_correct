@@ -8,7 +8,7 @@
 	    "script_command": "sister-reflect_correct/.imgspec/imgspec_run.sh",
 	    "repo_url": "https://github.com/EnSpec/sister-reflect_correct.git",
 	    "algorithm_name":"sister-reflect_correct",
-	    "code_version":"sister-dev",
+	    "code_version":"1.0.0",
 	    "algorithm_description":"Topo, BRDF and glint correction",
 	    "environment_name":"ubuntu",
 	    "disk_space":"70GB",
