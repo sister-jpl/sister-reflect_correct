@@ -112,7 +112,7 @@ def main():
         rfl.mask['calc_brdf'] =  mask_create(rfl,config_dict['brdf']['calc_mask'])
         calc_flex_single(rfl,config_dict['brdf'])
         rfl.corrections.append('brdf')
-        corretions.append('BRDF')
+        corrections.append('BRDF')
     if args.glint:
         print('Setting glint coefficients')
         rfl.glint = config_dict['glint']
