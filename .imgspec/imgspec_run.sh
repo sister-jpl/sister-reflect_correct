@@ -19,9 +19,9 @@ output_base_name=$(echo "${rfl_name/L2A_RSRFL/"L2A_CORFL"}")
 echo "Found input RFL file: $rfl_path"
 echo "Found input OBS file: $obs_path"
 
-if [[ $file_base == SISTER_AV* ]]; then
+if [[ $rfl_name == SISTER_AV* ]]; then
     corrections="--topo --brdf --glint"
-else [[ $file_base == PRS* ]];
+else;
     corrections="--glint"
 fi
 
