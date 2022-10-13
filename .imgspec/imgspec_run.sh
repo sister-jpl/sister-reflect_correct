@@ -21,7 +21,7 @@ echo "Found input OBS file: $obs_path"
 
 if [[ $rfl_name == SISTER_AV* ]]; then
     corrections="--topo --brdf --glint"
-else;
+else
     corrections="--glint"
 fi
 
