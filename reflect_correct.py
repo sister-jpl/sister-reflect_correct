@@ -55,17 +55,11 @@ config_dict["glint"]  = {}
 config_dict['glint']['type'] = 'gao'
 config_dict['glint']['correction_wave'] = 860
 config_dict['glint']['apply_mask'] =  [["ndi", {'band_1': 850,'band_2': 660,
-                                              'min': -1,'max': 0.}]]
+                                              'min': -1,'max': 0.}],
+                                       ["band", {'band': 560,
+                                              'min': 0,'max': 0.2}]]
 config_dict['glint']['truncate'] = True
 #######################################################
-
-# def args():return
-# args.out_dir = '/Users/achlus/temp/'
-# args.rfl_file = '/Users/achlus/Downloads/f090710t01p00r11_rfl/f090710t01p00r11_rfl'
-# args.obs_file = '/Users/achlus/Downloads/f090710t01p00r11_l1p/f090710t01p00r11rdn_b_obs_ort'
-# args.topo = False
-# args.brdf  =True
-# args.glint = False
 
 def main():
 
