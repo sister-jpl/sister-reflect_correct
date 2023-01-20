@@ -21,16 +21,13 @@ def main():
     with open(inputs_json, 'r') as in_file:
         inputs =json.load(in_file)
 
-    # run_config = {"inputs":{}}
+    run_config = {"inputs":{}}
 
-    # for file_dict in inputs["file"]:
-    #     for key,value in file_dict.items():
-    #         run_config["inputs"][key] = value
+    for file_dict in inputs["file"]:
+        for key,value in file_dict.items():
+            run_config["inputs"][key] = value
 
-    # run_config["inputs"].update(inputs["config"])
-
-    #Temporary workaround
-    run_config = {"inputs":inputs}
+    run_config["inputs"].update(inputs["config"])
 
     config_file = 'runconfig.json'
 
