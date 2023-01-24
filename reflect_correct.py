@@ -74,14 +74,17 @@ def main():
 
     os.mkdir('output')
 
-    rfl_base_name = os.path.basename(run_config['inputs']['l2a_granule'])
-    rfl_file = f'input/{rfl_base_name}/{rfl_base_name}.bin'
-    rfl_out_file =  f'output/{rfl_base_name.replace("RSRFL","CORFL")}.bin'
-    rfl_met = f'input/{rfl_base_name}/{rfl_base_name}.met.json'
-    rfl_out_met = rfl_out_file.replace('.bin','.met.json')
+    rfl_base_name = os.path.basename(run_config['inputs']['l2a_rfl'])
+    sister,sensor,level,product,datetime,crid = rfl_base_name.split('_')
 
-    rdn_base_name = os.path.basename(run_config['inputs']['l1b_granule'])
-    obs_file = f'input/{rdn_base_name}/{rdn_base_name}_OBS.bin'
+    rfl_file = f'input/{rfl_base_name}/{rfl_base_name}.bin'
+    rfl_met = rfl_file.replace('.bin','.met.json')
+
+    out_rfl_file =  f'output/SISTER_{sensor}_L2A_CORFL_{datetime}_{CRID}.bin'
+    out_rfl_met = out_rfl_file.replace('.bin','.met.json')
+
+    obs_base_name = os.path.basename(run_config['inputs']['l1b_obs'])
+    obs_file = f'input/{obs_base_name}/{obs_base_name}.bin'
 
     # Load input file
     anc_files = dict(zip(anc_names,[[obs_file,a] for a in range(len(anc_names))]))
@@ -118,7 +121,7 @@ def main():
     header_dict['description'] =f'{" ".join(corrections)} corrected reflectance'
 
     print('Exporting corrected image')
-    writer = WriteENVI(rfl_out_file,header_dict)
+    writer = WriteENVI(out_rfl_file,header_dict)
     iterator = rfl.iterate(by='line', corrections=rfl.corrections)
     while not iterator.complete:
         line = iterator.read_next()
@@ -131,7 +134,13 @@ def main():
                       'processing_level': 'L2A',
                       'description' : header_dict['description']})
 
-    generate_quicklook(rfl_out_file)
+    generate_quicklook(out_rfl_file)
+
+    shutil.copyfile(run_config_json,
+                    out_rfl_file.replace('.bin','.runconfig.json'))
+
+    shutil.copyfile('run.log',
+                    out_rfl_file.replace('.bin','.log'))
 
 
 def generate_metadata(in_file,out_file,metadata):
