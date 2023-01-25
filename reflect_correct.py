@@ -96,7 +96,7 @@ def main():
     if ('PRISMA' in rfl_base_name) | ('DESIS' in rfl_base_name):
         corrections = ['Topographic','Glint']
     else:
-        corrections = ['Topographic','"BRDF','Glint']
+        corrections = ['Topographic','BRDF','Glint']
 
     #Run corrections
     if 'Topographic' in corrections:
