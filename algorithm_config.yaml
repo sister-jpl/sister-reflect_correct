@@ -17,14 +17,14 @@ disk_space: 50GB
 inputs:
 
   file:
-    - name: l1b_obs
+    - name: observation_dataset
       description:
       required: True
-    - name: l2a_rfl
+    - name: reflectance_dataset
       description:
       required: True
   config:
-    - name: CRID
+    - name: crid
       data_type:
       default: '000'
       description:
