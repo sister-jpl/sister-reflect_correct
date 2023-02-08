@@ -2,7 +2,7 @@
 
 ![AVIRIS correctionexample](./reflect_correct_example.png)
 
-###References
+### References
 
  - Gao, B. C., & Li, R. R. (2021). Correction of Sunglint Effects in High Spatial Resolution Hyperspectral Imagery Using SWIR or NIR Bands and Taking Account of Spectral Variation of Refractive Index of Water. Advances in Environmental and Engineering Research, 2(3), 1-15.
  - Queally, N., Ye, Z., Zheng, T., Chlus, A., Schneider, F., Pavlick, R. P., & Townsend, P. A. (2022). FlexBRDF: A flexible BRDF correction for grouped processing of airborne imaging spectroscopy flightlines. Journal of Geophysical Research: Biogeosciences, 127(1), e2021JG006622.
