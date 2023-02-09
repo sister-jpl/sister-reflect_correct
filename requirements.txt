@@ -1,2 +1,0 @@
-# sister-reflect_correct dependencies
-Pillow==9.2.0
