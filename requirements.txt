@@ -1,3 +1,0 @@
-# sister-reflect_correct dependencies
-hy_tools==1.4.2
-Pillow==9.2.0
