@@ -9,7 +9,7 @@
  - Soenen, S. A., Peddle, D. R., & Coburn, C. A. (2005). SCS+ C: A modified sun-canopy-sensor topographic correction in forested terrain. IEEE Transactions on geoscience and remote sensing, 43(9), 2148-2159.
 
 
-## PGE ArgumentsIn addition to required MAAP job submission arguments the L2A spectral resampling PGE also takes the following argument(s):|Argument| Type |  Description | Default||---|---|---|---|| observation_dataset| file |L1B observation dataset | -|| reflectance_dataset| config |L2A reflectance dataset| -|| crid| config | Composite release identifier| '000'|## OutputsThe outputs of the L2A reflectance correction PGE use the following naming convention:
+## PGE ArgumentsIn addition to required MAAP job submission arguments the L2A reflectance correction PGE also takes the following argument(s):|Argument| Type |  Description | Default||---|---|---|---|| observation_dataset| file |L1B observation dataset | -|| reflectance_dataset| file |L2A reflectance dataset| -|| crid| config | Composite release identifier| '000'|## OutputsThe outputs of the L2A reflectance correction PGE use the following naming convention:
 
     SISTER_<SENSOR>_L2A_CORFL_<YYYYMMDDTHHMMSS>_<CRID>
 |Product description |  Units |Example filename ||---|---|---|
