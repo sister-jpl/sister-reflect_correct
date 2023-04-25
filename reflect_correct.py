@@ -95,7 +95,7 @@ def main():
     rfl.read_file(rfl_file,'envi',anc_files)
     rfl.create_bad_bands([[300,400],[1337,1430],[1800,1960],[2450,2600]])
 
-    if ('PRISMA' in rfl_base_name) | ('DESIS' in rfl_base_name):
+    if sensor in ['PRISMA','DESIS','EMIT']:
         corrections = ['Topographic','Glint']
     else:
         corrections = ['Topographic','BRDF','Glint']
