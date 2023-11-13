@@ -1,9 +1,11 @@
+import glob
 import json
 import os
 import shutil
 import sys
 import numpy as np
 import hytools as ht
+from hytools.io import parse_envi_header, write_envi_header
 from hytools.io.envi import WriteENVI
 from hytools.brdf import calc_flex_single,set_solar_zn
 from hytools.topo import calc_scsc_coeffs
@@ -73,6 +75,8 @@ def main():
     with open(run_config_json, 'r') as in_file:
         run_config =json.load(in_file)
 
+    experimental = run_config['inputs']['experimental']
+
     os.mkdir('output')
 
     rfl_base_name = os.path.basename(run_config['inputs']['reflectance_dataset'])
@@ -131,19 +135,34 @@ def main():
         writer.write_line(line,iterator.current_line)
     writer.close()
 
+    # Take care of disclaimer in ENVI header and .met.json
+    if experimental:
+        disclaimer = "(DISCLAIMER: THIS DATA IS EXPERIMENTAL AND NOT INTENDED FOR SCIENTIFIC USE) "
+        out_hdr_file = out_rfl_file.replace(".bin", ".hdr")
+        hdr = parse_envi_header(out_hdr_file)
+        hdr["description"] = disclaimer + hdr["description"].capitalize()
+        write_envi_header(out_hdr_file, hdr)
+    else:
+        disclaimer = ""
     generate_metadata(rfl_met,
                       out_rfl_met,
                       {'product': 'CORFL',
                       'processing_level': 'L2A',
-                      'description' : header_dict['description']})
+                      'description' : disclaimer + header_dict['description']})
 
     generate_quicklook(out_rfl_file)
 
     shutil.copyfile(run_config_json,
                     out_rfl_file.replace('.bin','.runconfig.json'))
 
-    shutil.copyfile('run.log',
-                    out_rfl_file.replace('.bin','.log'))
+    if os.path.exists("run.log"):
+        shutil.copyfile('run.log',
+                        out_rfl_file.replace('.bin','.log'))
+
+    # If experimental, prefix filenames with "EXPERIMENTAL-"
+    if experimental:
+        for file in glob.glob(f"output/SISTER*"):
+            shutil.move(file, f"output/EXPERIMENTAL-{os.path.basename(file)}")
 
 
 def generate_metadata(in_file,out_file,metadata):
