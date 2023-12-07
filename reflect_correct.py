@@ -162,12 +162,6 @@ def main():
     if os.path.exists("run.log"):
         shutil.copyfile('run.log', output_log_path)
 
-    generate_metadata(rfl_met,
-                      out_rfl_met,
-                      {'product': 'CORFL',
-                      'processing_level': 'L2A',
-                      'description' : disclaimer + header_dict['description']})
-
     # Generate STAC
     catalog = pystac.Catalog(id=corfl_basename,
                              description=f'{disclaimer}This catalog contains the output data products of the SISTER '
@@ -209,18 +203,6 @@ def main():
         for asset in item.assets.values():
             fname = os.path.basename(asset.href)
             shutil.move(f"output/{fname}", f"output/{corfl_basename}/{item.id}/{fname}")
-
-
-def generate_metadata(in_file,out_file,metadata):
-
-    with open(in_file, 'r') as in_obj:
-        in_met =json.load(in_obj)
-
-    for key,value in metadata.items():
-        in_met[key] = value
-
-    with open(out_file, 'w') as out_obj:
-        json.dump(in_met,out_obj,indent=3)
 
 
 def generate_quicklook(input_file):
