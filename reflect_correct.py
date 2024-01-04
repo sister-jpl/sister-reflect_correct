@@ -252,7 +252,7 @@ def generate_stac_metadata(header_file):
     metadata['properties'] = {
         'sensor': header['sensor type'].upper(),
         'description': header['description'],
-        'product': base_name.split('_')[4],
+        'product': base_name.split('_')[3],
         'processing_level': base_name.split('_')[2]
     }
     return metadata
