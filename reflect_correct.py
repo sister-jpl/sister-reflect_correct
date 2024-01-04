@@ -91,10 +91,8 @@ def main():
     crid = run_config['inputs']['crid']
 
     rfl_file = f'input/{rfl_base_name}/{rfl_base_name}.bin'
-    rfl_met = rfl_file.replace('.bin','.met.json')
 
     out_rfl_file =  f'output/SISTER_{sensor}_L2A_CORFL_{datetime}_{crid}.bin'
-    out_rfl_met = out_rfl_file.replace('.bin','.met.json')
 
     obs_base_name = os.path.basename(run_config['inputs']['observation_dataset'])
     obs_file = f'input/{obs_base_name}/{obs_base_name}.bin'
