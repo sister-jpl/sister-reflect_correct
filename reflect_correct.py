@@ -90,12 +90,12 @@ def main():
 
     crid = run_config['inputs']['crid']
 
-    rfl_file = f'input/{rfl_base_name}/{rfl_base_name}.bin'
+    rfl_file = f'{run_config["inputs"]["reflectance_dataset"]}/{rfl_base_name}.bin'
 
     out_rfl_file =  f'output/SISTER_{sensor}_L2A_CORFL_{datetime}_{crid}.bin'
 
     obs_base_name = os.path.basename(run_config['inputs']['observation_dataset'])
-    obs_file = f'input/{obs_base_name}/{obs_base_name}.bin'
+    obs_file = f'{run_config["inputs"]["observation_dataset"]}/{obs_base_name}.bin'
 
     # Load input file
     anc_files = dict(zip(anc_names,[[obs_file,a] for a in range(len(anc_names))]))
@@ -196,11 +196,13 @@ def main():
     print("Catalog HREF: ", catalog.get_self_href())
     # print("Item HREF: ", item.get_self_href())
 
-    # Move the assets from the output directory to the stac item directories
+    # Move the assets from the output directory to the stac item directories and create empty .met.json files
     for item in catalog.get_items():
         for asset in item.assets.values():
             fname = os.path.basename(asset.href)
             shutil.move(f"output/{fname}", f"output/{corfl_basename}/{item.id}/{fname}")
+        with open(f"output/{corfl_basename}/{item.id}/{item.id}.met.json", mode="w"):
+            pass
 
 
 def generate_quicklook(input_file):
@@ -246,12 +248,17 @@ def generate_stac_metadata(header_file):
     geometry = [list(x) for x in zip(coords[::2], coords[1::2])]
     # Add first coord to the end of the list to close the polygon
     geometry.append(geometry[0])
-    metadata['geometry'] = geometry
+    metadata['geometry'] = {
+        "type": "Polygon",
+        "coordinates": geometry
+    }
+    base_tokens = base_name.split('_')
+    metadata['collection'] = f"SISTER_{base_tokens[1]}_{base_tokens[2]}_{base_tokens[3]}_{base_tokens[5]}"
     metadata['properties'] = {
-        'sensor': header['sensor type'].upper(),
+        'sensor': base_tokens[1],
         'description': header['description'],
-        'product': base_name.split('_')[3],
-        'processing_level': base_name.split('_')[2]
+        'product': base_tokens[3],
+        'processing_level': base_tokens[2]
     }
     return metadata
 
@@ -263,6 +270,7 @@ def create_item(metadata, assets):
         start_datetime=metadata['start_datetime'],
         end_datetime=metadata['end_datetime'],
         geometry=metadata['geometry'],
+        collection=metadata['collection'],
         bbox=None,
         properties=metadata['properties']
     )
