@@ -1,6 +1,7 @@
 import datetime as dt
 import glob
 import json
+import logging
 import os
 import shutil
 import sys
@@ -72,6 +73,17 @@ config_dict['glint']['truncate'] = True
 
 def main():
 
+    # Set up console logging using root logger
+    logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", level=logging.INFO)
+    logger = logging.getLogger("sister-reflect_correct")
+    # Set up file handler logging
+    handler = logging.FileHandler("pge_run.log")
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s [%(module)s]: %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.info("Starting reflect_correct.py")
+
     run_config_json = sys.argv[1]
 
     with open(run_config_json, 'r') as in_file:
@@ -110,20 +122,20 @@ def main():
 
     #Run corrections
     if 'Topographic' in corrections:
-        print('Calculating topo coefficients')
+        logger.info('Calculating topo coefficients')
         rfl.mask['calc_topo'] =  mask_create(rfl,config_dict['topo']['calc_mask'])
         rfl.mask['apply_topo'] =  mask_create(rfl,config_dict['topo']['apply_mask'])
         calc_scsc_coeffs(rfl,config_dict['topo'])
         rfl.corrections.append('topo')
     if 'BRDF' in corrections:
-        print('Calculating BRDF coefficients')
+        logger.info('Calculating BRDF coefficients')
         set_brdf(rfl,config_dict['brdf'])
         set_solar_zn(rfl)
         rfl.mask['calc_brdf'] =  mask_create(rfl,config_dict['brdf']['calc_mask'])
         calc_flex_single(rfl,config_dict['brdf'])
         rfl.corrections.append('brdf')
     if 'Glint' in corrections:
-        print('Setting glint coefficients')
+        logger.info('Setting glint coefficients')
         rfl.glint = config_dict['glint']
         rfl.corrections.append('glint')
 
@@ -131,7 +143,7 @@ def main():
     header_dict = rfl.get_header()
     header_dict['description'] =f'{" ".join(corrections)} corrected reflectance'
 
-    print('Exporting corrected image')
+    logger.info('Exporting corrected image')
     writer = WriteENVI(out_rfl_file,header_dict)
     iterator = rfl.iterate(by='line', corrections=rfl.corrections)
     while not iterator.complete:
@@ -157,8 +169,8 @@ def main():
     shutil.copyfile(run_config_json, output_runconfig_path)
 
     output_log_path = f'output/{corfl_basename}.log'
-    if os.path.exists("run.log"):
-        shutil.copyfile('run.log', output_log_path)
+    if os.path.exists("pge_run.log"):
+        shutil.copyfile('pge_run.log', output_log_path)
 
     # Generate STAC
     catalog = pystac.Catalog(id=corfl_basename,

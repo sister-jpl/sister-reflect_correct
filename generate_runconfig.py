@@ -20,8 +20,8 @@ def main():
     parser = argparse.ArgumentParser(description='Parse inputs to create runconfig.json')
     parser.add_argument('--observation_dataset', help='Path to reflectance dataset')
     parser.add_argument('--reflectance_dataset', help='Path to uncertainty dataset')
-    parser.add_argument('--crid', help='CRID value')
-    parser.add_argument('--experimental', help='If true then designates data as experiemntal')
+    parser.add_argument('--crid', help='CRID value', default="000")
+    parser.add_argument('--experimental', help='If true then designates data as experiemntal', default="True")
     args = parser.parse_args()
 
     run_config = {
