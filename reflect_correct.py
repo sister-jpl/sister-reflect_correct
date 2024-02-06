@@ -1,16 +1,21 @@
+import datetime as dt
+import glob
 import json
+import logging
 import os
 import shutil
 import sys
 import numpy as np
 import hytools as ht
+from hytools.io import parse_envi_header, write_envi_header
 from hytools.io.envi import WriteENVI
 from hytools.brdf import calc_flex_single,set_solar_zn
 from hytools.topo import calc_scsc_coeffs
 from hytools.masks import mask_create
 from hytools.misc import set_brdf
 from PIL import Image
-
+import pystac
+import spectral.io.envi as envi
 
 anc_names = ['path_length','sensor_az','sensor_zn',
                 'solar_az', 'solar_zn','phase','slope',
@@ -68,10 +73,27 @@ config_dict['glint']['truncate'] = True
 
 def main():
 
+    # Set up console logging using root logger
+    logging.basicConfig(format="%(asctime)s %(levelname)s: %(message)s", level=logging.INFO)
+    logger = logging.getLogger("sister-reflect_correct")
+    # Set up file handler logging
+    handler = logging.FileHandler("pge_run.log")
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter("%(asctime)s %(levelname)s [%(module)s]: %(message)s")
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    logger.info("Starting reflect_correct.py")
+
     run_config_json = sys.argv[1]
 
     with open(run_config_json, 'r') as in_file:
         run_config =json.load(in_file)
+
+    experimental = run_config['inputs']['experimental']
+    if experimental:
+        disclaimer = "(DISCLAIMER: THIS DATA IS EXPERIMENTAL AND NOT INTENDED FOR SCIENTIFIC USE) "
+    else:
+        disclaimer = ""
 
     os.mkdir('output')
 
@@ -80,14 +102,12 @@ def main():
 
     crid = run_config['inputs']['crid']
 
-    rfl_file = f'input/{rfl_base_name}/{rfl_base_name}.bin'
-    rfl_met = rfl_file.replace('.bin','.met.json')
+    rfl_file = f'{run_config["inputs"]["reflectance_dataset"]}/{rfl_base_name}.bin'
 
     out_rfl_file =  f'output/SISTER_{sensor}_L2A_CORFL_{datetime}_{crid}.bin'
-    out_rfl_met = out_rfl_file.replace('.bin','.met.json')
 
     obs_base_name = os.path.basename(run_config['inputs']['observation_dataset'])
-    obs_file = f'input/{obs_base_name}/{obs_base_name}.bin'
+    obs_file = f'{run_config["inputs"]["observation_dataset"]}/{obs_base_name}.bin'
 
     # Load input file
     anc_files = dict(zip(anc_names,[[obs_file,a] for a in range(len(anc_names))]))
@@ -102,20 +122,20 @@ def main():
 
     #Run corrections
     if 'Topographic' in corrections:
-        print('Calculating topo coefficients')
+        logger.info('Calculating topo coefficients')
         rfl.mask['calc_topo'] =  mask_create(rfl,config_dict['topo']['calc_mask'])
         rfl.mask['apply_topo'] =  mask_create(rfl,config_dict['topo']['apply_mask'])
         calc_scsc_coeffs(rfl,config_dict['topo'])
         rfl.corrections.append('topo')
     if 'BRDF' in corrections:
-        print('Calculating BRDF coefficients')
+        logger.info('Calculating BRDF coefficients')
         set_brdf(rfl,config_dict['brdf'])
         set_solar_zn(rfl)
         rfl.mask['calc_brdf'] =  mask_create(rfl,config_dict['brdf']['calc_mask'])
         calc_flex_single(rfl,config_dict['brdf'])
         rfl.corrections.append('brdf')
     if 'Glint' in corrections:
-        print('Setting glint coefficients')
+        logger.info('Setting glint coefficients')
         rfl.glint = config_dict['glint']
         rfl.corrections.append('glint')
 
@@ -123,7 +143,7 @@ def main():
     header_dict = rfl.get_header()
     header_dict['description'] =f'{" ".join(corrections)} corrected reflectance'
 
-    print('Exporting corrected image')
+    logger.info('Exporting corrected image')
     writer = WriteENVI(out_rfl_file,header_dict)
     iterator = rfl.iterate(by='line', corrections=rfl.corrections)
     while not iterator.complete:
@@ -131,31 +151,70 @@ def main():
         writer.write_line(line,iterator.current_line)
     writer.close()
 
-    generate_metadata(rfl_met,
-                      out_rfl_met,
-                      {'product': 'CORFL',
-                      'processing_level': 'L2A',
-                      'description' : header_dict['description']})
-
     generate_quicklook(out_rfl_file)
 
-    shutil.copyfile(run_config_json,
-                    out_rfl_file.replace('.bin','.runconfig.json'))
+    # Take care of disclaimer in ENVI header and rename files
+    if experimental:
+        out_hdr_file = out_rfl_file.replace(".bin", ".hdr")
+        hdr = parse_envi_header(out_hdr_file)
+        hdr["description"] = disclaimer + hdr["description"].capitalize()
+        write_envi_header(out_hdr_file, hdr)
+        for file in glob.glob(f"output/SISTER*"):
+            shutil.move(file, f"output/EXPERIMENTAL-{os.path.basename(file)}")
 
-    shutil.copyfile('run.log',
-                    out_rfl_file.replace('.bin','.log'))
+    corfl_file = glob.glob("output/*%s.bin" % run_config['inputs']['crid'])[0]
+    corfl_basename = os.path.basename(corfl_file)[:-4]
 
+    output_runconfig_path = f'output/{corfl_basename}.runconfig.json'
+    shutil.copyfile(run_config_json, output_runconfig_path)
 
-def generate_metadata(in_file,out_file,metadata):
+    output_log_path = f'output/{corfl_basename}.log'
+    if os.path.exists("pge_run.log"):
+        shutil.copyfile('pge_run.log', output_log_path)
 
-    with open(in_file, 'r') as in_obj:
-        in_met =json.load(in_obj)
+    # Generate STAC
+    catalog = pystac.Catalog(id=corfl_basename,
+                             description=f'{disclaimer}This catalog contains the output data products of the SISTER '
+                                         f'corrected reflectance PGE, including topo-, brdf-, and glint-corrected '
+                                         f'reflectance. Execution artifacts including the runconfig file and execution '
+                                         f'log file are included with the corrected reflectance data.')
 
-    for key,value in metadata.items():
-        in_met[key] = value
+    # Add items for data products
+    hdr_files = glob.glob("output/*SISTER*.hdr")
+    hdr_files.sort()
+    for hdr_file in hdr_files:
+        # TODO: Use incoming item.json to get properties and geometry and use hdr_file for description (?)
+        metadata = generate_stac_metadata(hdr_file)
+        assets = {
+            "envi_binary": f"./{os.path.basename(hdr_file.replace('.hdr', '.bin'))}",
+            "envi_header": f"./{os.path.basename(hdr_file)}"
+        }
+        # If it's the reflectance product, then add png, runconfig, and log
+        if os.path.basename(hdr_file) == f"{corfl_basename}.hdr":
+            png_file = hdr_file.replace(".hdr", ".png")
+            assets["browse"] = f"./{os.path.basename(png_file)}"
+            assets["runconfig"] = f"./{os.path.basename(output_runconfig_path)}"
+            if os.path.exists(output_log_path):
+                assets["log"] = f"./{os.path.basename(output_log_path)}"
+        item = create_item(metadata, assets)
+        catalog.add_item(item)
 
-    with open(out_file, 'w') as out_obj:
-        json.dump(in_met,out_obj,indent=3)
+    # set catalog hrefs
+    catalog.normalize_hrefs(f"./output/{corfl_basename}")
+
+    # save the catalog
+    catalog.describe()
+    catalog.save(catalog_type=pystac.CatalogType.SELF_CONTAINED)
+    print("Catalog HREF: ", catalog.get_self_href())
+    # print("Item HREF: ", item.get_self_href())
+
+    # Move the assets from the output directory to the stac item directories and create empty .met.json files
+    for item in catalog.get_items():
+        for asset in item.assets.values():
+            fname = os.path.basename(asset.href)
+            shutil.move(f"output/{fname}", f"output/{corfl_basename}/{item.id}/{fname}")
+        with open(f"output/{corfl_basename}/{item.id}/{item.id}.met.json", mode="w"):
+            pass
 
 
 def generate_quicklook(input_file):
@@ -185,6 +244,53 @@ def generate_quicklook(input_file):
 
     im = Image.fromarray(rgb)
     im.save(image_file)
+
+
+def generate_stac_metadata(header_file):
+
+    header = envi.read_envi_header(header_file)
+    base_name = os.path.basename(header_file)[:-4]
+
+    metadata = {}
+    metadata['id'] = base_name
+    metadata['start_datetime'] = dt.datetime.strptime(header['start acquisition time'], "%Y-%m-%dt%H:%M:%Sz")
+    metadata['end_datetime'] = dt.datetime.strptime(header['end acquisition time'], "%Y-%m-%dt%H:%M:%Sz")
+    # Split corner coordinates string into list
+    coords = [float(x) for x in header['bounding box'].replace(']', '').replace('[', '').split(',')]
+    geometry = [list(x) for x in zip(coords[::2], coords[1::2])]
+    # Add first coord to the end of the list to close the polygon
+    geometry.append(geometry[0])
+    metadata['geometry'] = {
+        "type": "Polygon",
+        "coordinates": geometry
+    }
+    base_tokens = base_name.split('_')
+    metadata['collection'] = f"SISTER_{base_tokens[1]}_{base_tokens[2]}_{base_tokens[3]}_{base_tokens[5]}"
+    metadata['properties'] = {
+        'sensor': base_tokens[1],
+        'description': header['description'],
+        'product': base_tokens[3],
+        'processing_level': base_tokens[2]
+    }
+    return metadata
+
+
+def create_item(metadata, assets):
+    item = pystac.Item(
+        id=metadata['id'],
+        datetime=metadata['start_datetime'],
+        start_datetime=metadata['start_datetime'],
+        end_datetime=metadata['end_datetime'],
+        geometry=metadata['geometry'],
+        collection=metadata['collection'],
+        bbox=None,
+        properties=metadata['properties']
+    )
+    # Add assets
+    for key, href in assets.items():
+        item.add_asset(key=key, asset=pystac.Asset(href=href))
+    return item
+
 
 if __name__== "__main__":
     main()
